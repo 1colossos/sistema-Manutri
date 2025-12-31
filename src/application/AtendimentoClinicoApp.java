@@ -36,27 +36,27 @@ public class AtendimentoClinicoApp {
                     break;
 
                 case 2:
-                    listarPacientesCompleto();
+                    gerenciarAnamnese();
                     break;
 
                 case 3:
-                    novaConsultaMetabolica();
+                    listarPacientesCompleto();
                     break;
 
                 case 4:
-                    sugerirAlimentos();
+                    novaConsultaMetabolica();
                     break;
 
                 case 5:
-                    montarRefeicaoInterativa();
+                    sugerirAlimentos();
                     break;
 
                 case 6:
-                    excluirPaciente();
+                    montarRefeicaoInterativa();
                     break;
 
                 case 7:
-                    gerenciarAnamnese();
+                    excluirPaciente();
                     break;
 
                 case 0:
@@ -74,12 +74,12 @@ public class AtendimentoClinicoApp {
     private static void exibirMenu() {
         System.out.println("\n--- MENU PRINCIPAL ---");
         System.out.println("1 - Cadastrar Paciente");
-        System.out.println("2 - Listar Pacientes");
-        System.out.println("3 - Realizar Consulta");
-        System.out.println("4 - Sugestão de Alimentos");
-        System.out.println("5 - Calculadora de Refeição");
-        System.out.println("6 - Excluir Paciente");
-        System.out.println("7 - Anamnese (Registrar/Ver)");
+        System.out.println("2 - Anamnese (Registrar/Ver)");
+        System.out.println("3 - Listar Pacientes");
+        System.out.println("4 - Realizar Consulta (Antropometria)");
+        System.out.println("5 - Sugestão de Alimentos");
+        System.out.println("6 - Calculadora de Refeição");
+        System.out.println("7 - Excluir Paciente");
         System.out.println("0 - Sair");
         System.out.print("Digite a opção: ");
     }
@@ -116,6 +116,57 @@ public class AtendimentoClinicoApp {
         service.cadastrar(novoPaciente);
 
         System.out.println("✅ Paciente cadastrado com sucesso!");
+    }
+
+    private static void gerenciarAnamnese() {
+        System.out.println("\n>> GESTÃO DE ANAMNESE");
+
+        Paciente paciente = buscarPaciente();
+
+        if (paciente == null) return;
+
+        System.out.println("Paciente: " + paciente.getNome());
+
+        if (paciente.getAnamnese() != null) {
+            System.out.println("\n✅ Este paciente JÁ possui anamnese registrada:");
+            System.out.println(paciente.getAnamnese().toString());
+            System.out.print("\nDeseja SOBRESCREVER (refazer) a anamnese? (S/N): ");
+            String resp = scanner.nextLine();
+            if (!resp.equalsIgnoreCase("S")) {
+                return;
+            }
+        }
+
+        System.out.println("\n--- Iniciando Entrevista ---");
+
+        System.out.print("1. Qual a Queixa Principal (motivo da consulta)? ");
+        String queixa = scanner.nextLine();
+
+        System.out.print("2. Histórico Patológico (Doenças, cirurgias, alergias): ");
+        String histPatologico = scanner.nextLine();
+
+        System.out.print("3. Histórico Familiar (Pai/Mãe com diabetes, hipertensão?): ");
+        String histFamiliar = scanner.nextLine();
+
+        System.out.print("4. Fuma? (S/N): ");
+        boolean fuma = scanner.nextLine().trim().toUpperCase().startsWith("S");
+
+        System.out.print("5. Consome bebida alcoólica? (S/N): ");
+        boolean alcool = scanner.nextLine().equalsIgnoreCase("S");
+
+        System.out.print("6. Pratica exercícios físicos regularmente? (S/N): ");
+        boolean exercicio = scanner.nextLine().equalsIgnoreCase("S");
+
+        System.out.print("7. Resumo da Rotina Diária (Acorda, trabalha, dorme...): ");
+        String rotina = scanner.nextLine();
+
+        Anamnese novaAnamnese = new Anamnese(queixa, histPatologico, fuma, alcool, exercicio, rotina);
+        novaAnamnese.setHistoricoFamiliar(histFamiliar);
+
+        paciente.setAnamnese(novaAnamnese);
+
+        System.out.println("\n✅ Anamnese registrada com sucesso!");
+        pausa();
     }
 
     private static void listarPacientesCompleto() {
@@ -170,18 +221,10 @@ public class AtendimentoClinicoApp {
         int opAtv = Integer.parseInt(scanner.nextLine());
         NivelAtividade nivelAtividade;
         switch (opAtv) {
-            case 1:
-                nivelAtividade = NivelAtividade.SEDENTARIO;
-                break;
-            case 2:
-                nivelAtividade = NivelAtividade.LEVE;
-                break;
-            case 4:
-                nivelAtividade = NivelAtividade.INTENSO;
-                break;
-            default:
-                nivelAtividade = NivelAtividade.MODERADO;
-                break;
+            case 1: nivelAtividade = NivelAtividade.SEDENTARIO; break;
+            case 2: nivelAtividade = NivelAtividade.LEVE; break;
+            case 4: nivelAtividade = NivelAtividade.INTENSO; break;
+            default: nivelAtividade = NivelAtividade.MODERADO; break;
         }
 
         AvaliacaoAntropometrica av = new AvaliacaoAntropometrica(peso, altura);
@@ -208,7 +251,7 @@ public class AtendimentoClinicoApp {
 
         List<AvaliacaoAntropometrica> historico = paciente.getHistoricoAvaliacoes();
         if (historico.isEmpty()) {
-            System.out.println("⚠️ Necessário realizar consulta (Opção 3) antes.");
+            System.out.println("⚠️ Necessário realizar consulta (Opção 4) antes.");
             return;
         }
 
@@ -250,13 +293,7 @@ public class AtendimentoClinicoApp {
 
         for (Alimento a : sugestoes) {
             System.out.println(String.format("%-25s | %-5.0fg | %-5.0fCal | %-5.1f | %-5.1f | %-5.1f",
-                    a.getNome(),
-                    a.getPorcaoGramas(),
-                    a.getCalorias(),
-                    a.getProteina(),
-                    a.getCarboidrato(),
-                    a.getGordura()
-            ));
+                    a.getNome(), a.getPorcaoGramas(), a.getCalorias(), a.getProteina(), a.getCarboidrato(), a.getGordura()));
         }
         System.out.println("-----------------------------------------------------------------------");
         pausa();
@@ -279,9 +316,7 @@ public class AtendimentoClinicoApp {
 
             try {
                 op = Integer.parseInt(scanner.nextLine());
-            } catch (Exception e) {
-                op = -1;
-            }
+            } catch (Exception e) { op = -1; }
 
             if (op == 1) {
                 List<Alimento> lista = BancoDeAlimentos.getAlimentosPorObjetivo("MANUTENCAO");
@@ -295,21 +330,14 @@ public class AtendimentoClinicoApp {
                         refeicao.adicionarAlimento(lista.get(escolha - 1));
                         System.out.println("✅ Adicionado!");
                     }
-                } catch (Exception e) {
-                    System.out.println("❌ Inválido.");
-                }
+                } catch (Exception e) { System.out.println("❌ Inválido."); }
 
             } else if (op == 2) {
-                System.out.print("Nome: ");
-                String n = scanner.nextLine();
-                System.out.print("Calorias: ");
-                double c = Double.parseDouble(scanner.nextLine());
-                System.out.print("Proteínas: ");
-                double p = Double.parseDouble(scanner.nextLine());
-                System.out.print("Carboidratos: ");
-                double carb = Double.parseDouble(scanner.nextLine());
-                System.out.print("Gorduras: ");
-                double g = Double.parseDouble(scanner.nextLine());
+                System.out.print("Nome: "); String n = scanner.nextLine();
+                System.out.print("Calorias: "); double c = Double.parseDouble(scanner.nextLine());
+                System.out.print("Proteínas: "); double p = Double.parseDouble(scanner.nextLine());
+                System.out.print("Carboidratos: "); double carb = Double.parseDouble(scanner.nextLine());
+                System.out.print("Gorduras: "); double g = Double.parseDouble(scanner.nextLine());
 
                 refeicao.adicionarAlimento(new Alimento(n, 100, p, carb, g, c));
                 System.out.println("✅ Adicionado!");
@@ -336,23 +364,6 @@ public class AtendimentoClinicoApp {
                 "G: " + String.format("%.1f", refeicao.calcularTotalGordura()) + "g");
         System.out.println("=======================================================================");
         pausa();
-    }
-
-    private static Paciente buscarPaciente() {
-        System.out.print("Digite o CPF ou Email do paciente: ");
-        String termo = scanner.nextLine();
-        for (Paciente p : service.listarTodos()) {
-            if (p.getCpf().equals(termo) || p.getEmail().equalsIgnoreCase(termo)) {
-                return p;
-            }
-        }
-        System.out.println("❌ Paciente não encontrado!");
-        return null;
-    }
-
-    private static void pausa() {
-        System.out.println("\nPressione ENTER para continuar...");
-        scanner.nextLine();
     }
 
     private static void excluirPaciente() {
@@ -391,54 +402,20 @@ public class AtendimentoClinicoApp {
         pausa();
     }
 
-    private static void gerenciarAnamnese() {
-        System.out.println("\n>> GESTÃO DE ANAMNESE");
-
-        Paciente paciente = buscarPaciente();
-
-        if (paciente == null) return;
-
-        System.out.println("Paciente: " + paciente.getNome());
-
-        if (paciente.getAnamnese() != null) {
-            System.out.println("\n✅ Este paciente JÁ possui anamnese registrada:");
-            System.out.println(paciente.getAnamnese().toString());
-            System.out.print("\nDeseja SOBRESCREVER (refazer) a anamnese? (S/N): ");
-            String resp = scanner.nextLine();
-            if (!resp.equalsIgnoreCase("S")) {
-                return;
+    private static Paciente buscarPaciente() {
+        System.out.print("Digite o CPF ou Email do paciente: ");
+        String termo = scanner.nextLine();
+        for (Paciente p : service.listarTodos()) {
+            if (p.getCpf().equals(termo) || p.getEmail().equalsIgnoreCase(termo)) {
+                return p;
             }
         }
+        System.out.println("❌ Paciente não encontrado!");
+        return null;
+    }
 
-        System.out.println("\n--- Iniciando Entrevista ---");
-
-        System.out.print("1. Qual a Queixa Principal (motivo da consulta)? ");
-        String queixa = scanner.nextLine();
-
-        System.out.print("2. Histórico Patológico (Doenças, cirurgias, alergias): ");
-        String histPatologico = scanner.nextLine();
-
-        System.out.print("3. Histórico Familiar (Pai/Mãe com diabetes, hipertensão?): ");
-        String histFamiliar = scanner.nextLine();
-
-        System.out.print("4. Fuma? (S/N): ");
-        boolean fuma = scanner.nextLine().trim().toUpperCase().startsWith("S");
-
-        System.out.print("5. Consome bebida alcoólica? (S/N): ");
-        boolean alcool = scanner.nextLine().equalsIgnoreCase("S");
-
-        System.out.print("6. Pratica exercícios físicos regularmente? (S/N): ");
-        boolean exercicio = scanner.nextLine().equalsIgnoreCase("S");
-
-        System.out.print("7. Resumo da Rotina Diária (Acorda, trabalha, dorme...): ");
-        String rotina = scanner.nextLine();
-
-        Anamnese novaAnamnese = new Anamnese(queixa, histPatologico, fuma, alcool, exercicio, rotina);
-        novaAnamnese.setHistoricoFamiliar(histFamiliar);
-
-        paciente.setAnamnese(novaAnamnese);
-
-        System.out.println("\n✅ Anamnese registrada com sucesso!");
-        pausa();
+    private static void pausa() {
+        System.out.println("\nPressione ENTER para continuar...");
+        scanner.nextLine();
     }
 }
